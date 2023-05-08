@@ -1,6 +1,7 @@
 import { QueryClient } from "@tanstack/react-query";
 import { Cache, CacheEntry, totalTtl } from "cachified";
 import { DBSchema, IDBPDatabase, openDB } from "idb/with-async-ittr";
+import { once } from "lodash-es";
 
 export const queryClient = new QueryClient();
 
@@ -44,21 +45,23 @@ const schedule = (fn: () => any) => {
   }
 };
 
-export const dbPromise = openDB<MyDB>("keyval-store", 1, {
-  upgrade(db) {
-    const store = db.createObjectStore("keyval");
-    store.createIndex("expires", "expires");
-  },
-}).then(async (db) => {
-  // Optimizing the cache does not need to happen right at startup, the app should
-  // just ignore expired keys anyway
-  // so we tell it to do it when the app is idle
-  schedule(() => {
-    optimizeCache(db);
-  });
+export const getDb = once(() =>
+  openDB<MyDB>("keyval-store", 1, {
+    upgrade(db) {
+      const store = db.createObjectStore("keyval");
+      store.createIndex("expires", "expires");
+    },
+  }).then(async (db) => {
+    // Optimizing the cache does not need to happen right at startup, the app should
+    // just ignore expired keys anyway
+    // so we tell it to do it when the app is idle
+    schedule(() => {
+      optimizeCache(db);
+    });
 
-  return db;
-});
+    return db;
+  })
+);
 
 export const handleKey = (key: string) => {
   const parsed = JSON.parse(key);
@@ -70,18 +73,18 @@ export const handleKey = (key: string) => {
 // minio
 export const idbCache: Cache = {
   async get(key) {
-    const db = await dbPromise;
+    const db = await getDb();
     const result = await db.get("keyval", handleKey(key));
     console.log(`got result ? ${Boolean(result)}`);
     return result;
   },
   async delete(key) {
-    const db = await dbPromise;
+    const db = await getDb();
     await db.delete("keyval", handleKey(key));
     queryClient.invalidateQueries(["cached_keys"]);
   },
   async set(key, value) {
-    const db = await dbPromise;
+    const db = await getDb();
     console.log(`set ` + handleKey(key));
     const ttl = totalTtl(value?.metadata);
     const createdTime = value?.metadata?.createdTime;

@@ -1,19 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
-import { dbPromise, optimizeCache, queryClient } from './idb-cache';
-import { useCachedQuery } from './use-cached-query';
+import { getDb, optimizeCache, queryClient } from '../../shared/idb-cache';
+import { useCachedQuery } from '../../shared/use-cached-query';
 import { useEffect, useState } from 'react';
+import ky from 'ky';
 
-async function fetchJson(...args: any[]) {
-  const res = await (fetch as any)(...args);
-  await new Promise((resolve) => setTimeout(resolve, 1_000));
-  return await res.json();
-}
-
-function App() {
+export function Page() {
   const database = useQuery({
     queryKey: ['cached_keys'],
     queryFn: async () => {
-      const db = await dbPromise;
+      const db = await getDb();
       const tx = db.transaction('keyval', 'readonly');
       const store = tx.objectStore('keyval');
 
@@ -40,14 +35,14 @@ function App() {
         Indexeddb Cache
         <button
           type="button"
-          onClick={() => dbPromise.then((db) => optimizeCache(db))}
+          onClick={() => getDb().then((db) => optimizeCache(db))}
         >
           Remove expired cache items
         </button>
         <button
           type="button"
           onClick={async () => {
-            const db = await dbPromise;
+            const db = await getDb();
             await db.clear('keyval');
             queryClient.invalidateQueries(['cached_keys']);
           }}
@@ -109,7 +104,7 @@ const CatFact = () => {
   const { data, status, error, fetchStatus, isStorageFetching } =
     useCachedQuery({
       queryKey: ['cat-fact'],
-      queryFn: () => fetchJson('https://catfact.ninja/fact'),
+      queryFn: () => ky('https://catfact.ninja/fact').json(),
     });
 
   return (
@@ -131,7 +126,7 @@ const Joke = () => {
     useCachedQuery({
       queryKey: ['joke'],
       queryFn: () =>
-        fetchJson('https://official-joke-api.appspot.com/random_joke'),
+        ky('https://official-joke-api.appspot.com/random_joke').json(),
     });
 
   return (
@@ -147,7 +142,3 @@ const Joke = () => {
     </>
   );
 };
-
-//
-
-export default App;
