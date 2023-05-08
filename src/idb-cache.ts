@@ -36,6 +36,14 @@ export async function optimizeCache(db: IDBPDatabase<MyDB>) {
   console.log("Optimized cache");
 }
 
+const schedule = (fn: () => any) => {
+  if (window.requestIdleCallback) {
+    window.requestIdleCallback(fn);
+  } else {
+    setTimeout(fn, 1);
+  }
+};
+
 export const dbPromise = openDB<MyDB>("keyval-store", 1, {
   upgrade(db) {
     const store = db.createObjectStore("keyval");
@@ -45,7 +53,7 @@ export const dbPromise = openDB<MyDB>("keyval-store", 1, {
   // Optimizing the cache does not need to happen right at startup, the app should
   // just ignore expired keys anyway
   // so we tell it to do it when the app is idle
-  requestIdleCallback(() => {
+  schedule(() => {
     optimizeCache(db);
   });
 
@@ -94,7 +102,7 @@ export const idbCache: Cache = {
       setTimeout(() => {
         console.log(`clearing expired value ` + handleKey(key));
 
-        requestIdleCallback(() => {
+        schedule(() => {
           optimizeCache(db);
         });
 
