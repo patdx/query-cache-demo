@@ -3,7 +3,14 @@ import { Cache, CacheEntry, totalTtl } from "cachified";
 import { DBSchema, IDBPDatabase, openDB } from "idb/with-async-ittr";
 import { once } from "lodash-es";
 
-export const queryClient = new QueryClient();
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // https://tanstack.com/query/v4/docs/react/guides/network-mode
+      networkMode: "offlineFirst",
+    },
+  },
+});
 
 interface MyDB extends DBSchema {
   keyval: {

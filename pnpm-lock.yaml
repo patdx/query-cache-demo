@@ -25,6 +25,15 @@ dependencies:
   lodash-es:
     specifier: ^4.17.21
     version: 4.17.21
+  mobx:
+    specifier: ^6.9.0
+    version: 6.9.0
+  mobx-react-lite:
+    specifier: ^3.4.3
+    version: 3.4.3(mobx@6.9.0)(react-dom@18.2.0)(react@18.2.0)
+  mobx-utils:
+    specifier: ^6.0.6
+    version: 6.0.6(mobx@6.9.0)
   react:
     specifier: ^18.2.0
     version: 18.2.0
@@ -40,6 +49,9 @@ dependencies:
   vite-plugin-ssr:
     specifier: ^0.4.123
     version: 0.4.123(vite@4.3.2)
+  water.css:
+    specifier: ^2.1.1
+    version: 2.1.1
 
 devDependencies:
   '@types/lodash-es':
@@ -93,6 +105,9 @@ devDependencies:
   vite-plugin-pwa:
     specifier: ^0.14.7
     version: 0.14.7(vite@4.3.2)(workbox-build@6.5.4)(workbox-window@6.5.4)
+  workbox-window:
+    specifier: ^6.5.4
+    version: 6.5.4
 
 packages:
 
@@ -106,7 +121,7 @@ packages:
     engines: {node: '>=6.0.0'}
     dependencies:
       '@jridgewell/gen-mapping': 0.3.3
-      '@jridgewell/trace-mapping': 0.3.9
+      '@jridgewell/trace-mapping': 0.3.18
     dev: true
 
   /@apideck/better-ajv-errors@0.3.6(ajv@8.12.0):
@@ -3573,6 +3588,36 @@ packages:
       ufo: 1.1.2
     dev: true
 
+  /mobx-react-lite@3.4.3(mobx@6.9.0)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-NkJREyFTSUXR772Qaai51BnE1voWx56LOL80xG7qkZr6vo8vEaLF3sz1JNUVh+rxmUzxYaqOhfuxTfqUh0FXUg==}
+    peerDependencies:
+      mobx: ^6.1.0
+      react: ^16.8.0 || ^17 || ^18
+      react-dom: '*'
+      react-native: '*'
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
+      react-native:
+        optional: true
+    dependencies:
+      mobx: 6.9.0
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
+  /mobx-utils@6.0.6(mobx@6.9.0):
+    resolution: {integrity: sha512-lzJtxOWgj3Dp2HeXviInV3ZRY4YhThzRHXuy90oKXDH2g+ymJGIts4bdjb7NQuSi34V25cMZoQX7TkHJQuKLOQ==}
+    peerDependencies:
+      mobx: ^6.0.0
+    dependencies:
+      mobx: 6.9.0
+    dev: false
+
+  /mobx@6.9.0:
+    resolution: {integrity: sha512-HdKewQEREEJgsWnErClfbFoVebze6rGazxFLU/XUyrII8dORfVszN1V0BMRnQSzcgsNNtkX8DHj3nC6cdWE9YQ==}
+    dev: false
+
   /mrmime@1.0.1:
     resolution: {integrity: sha512-hzzEagAgDyoU1Q6yg5uI+AorQgdvMCur3FcKf7NhMKWsaYg+RnbTyHRa/9IlLF9rf455MOCtcqqrQQ83pPP7Uw==}
     engines: {node: '>=10'}
@@ -4657,6 +4702,10 @@ packages:
       rollup: 3.21.5
     optionalDependencies:
       fsevents: 2.3.2
+
+  /water.css@2.1.1:
+    resolution: {integrity: sha512-gkO5byC+pZ7ndEV18hs/RmxKoDtEZXx06tZU4ocI3IBdv4xV64tlhjIFbDjurysRnNkiy2oQTr8PakRyzZWPJw==}
+    dev: false
 
   /webidl-conversions@4.0.2:
     resolution: {integrity: sha512-YQ+BmxuTgd6UXZW3+ICGfyqRyHXVlD5GtQr5+qjiNW7bF0cqrzX500HVXPBOvgXb5YnzDd+h0zqyv61KUD7+Sg==}

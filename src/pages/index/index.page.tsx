@@ -3,6 +3,8 @@ import { getDb, optimizeCache, queryClient } from '../../shared/idb-cache';
 import { useCachedQuery } from '../../shared/use-cached-query';
 import { useEffect, useState } from 'react';
 import ky from 'ky';
+import { observer, useLocalObservable } from 'mobx-react-lite';
+import { now } from 'mobx-utils';
 
 export function Page() {
   const database = useQuery({
@@ -31,8 +33,8 @@ export function Page() {
 
   return (
     <div>
-      <h2>
-        Indexeddb Cache
+      <h2>IndexedDB Cache</h2>
+      <div>
         <button
           type="button"
           onClick={() => getDb().then((db) => optimizeCache(db))}
@@ -49,7 +51,7 @@ export function Page() {
         >
           Delete all
         </button>
-      </h2>
+      </div>
       <table>
         <thead>
           <tr>
@@ -79,26 +81,41 @@ type CacheItemProps = {
   expires?: number;
 };
 
-function CacheItem(props: CacheItemProps) {
-  const [, render] = useState({});
-  let countdown = Infinity;
-  if (props.expires) {
-    countdown = props.expires - Date.now();
-  }
+const CacheItem = observer(function CacheItem({
+  name,
+  expires,
+}: CacheItemProps) {
+  const state = useLocalObservable(() => ({
+    expires,
+    get pretty() {
+      if (typeof this.expires !== 'number') {
+        return undefined;
+      }
 
+      return new Date(this.expires ?? 0).toJSON();
+    },
+    get secondsLeft() {
+      if (typeof this.expires !== 'number') {
+        return undefined;
+      }
+
+      return ((this.expires - now(100)) / 1000).toFixed(1);
+    },
+  }));
+
+  // sync state
   useEffect(() => {
-    const timer = setInterval(() => render({}), 1000);
-    return () => clearInterval(timer);
-  }, []);
+    state.expires = expires;
+  }, [expires, state]);
 
   return (
     <tr>
-      <td>{props.name}</td>
-      <td>{new Date(props.expires ?? 0).toJSON()}</td>
-      <td>{Math.round(countdown / 1000)} seconds</td>
+      <td>{name}</td>
+      <td>{state.pretty}</td>
+      <td className="tabular-nums">{state.secondsLeft} seconds</td>
     </tr>
   );
-}
+});
 
 const CatFact = () => {
   const { data, status, error, fetchStatus, isStorageFetching } =
@@ -110,7 +127,7 @@ const CatFact = () => {
   return (
     <>
       <h2>Cat fact</h2>
-      <pre>
+      <pre className="whitespace-pre-wrap">
         {JSON.stringify(
           { data, status, error, fetchStatus, isStorageFetching },
           undefined,
@@ -132,7 +149,7 @@ const Joke = () => {
   return (
     <>
       <h2>Joke</h2>
-      <pre>
+      <pre className="whitespace-pre-wrap">
         {JSON.stringify(
           { data, status, error, fetchStatus, isStorageFetching },
           undefined,

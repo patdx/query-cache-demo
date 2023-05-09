@@ -24,13 +24,22 @@ export async function render(pageContext: PageContextServer) {
     (documentProps && documentProps.description) || 'Cached Query Test';
 
   const documentHtml = renderToStaticMarkup(
-    <div>
-      <meta charSet="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <meta name="description" content={desc} />
-      <title>{title}</title>
-      <div id="page-view" dangerouslySetInnerHTML={{ __html: pageHtml }} />
-    </div>
+    <html lang="en">
+      <head>
+        <meta charSet="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content={desc} />
+        <title>{title}</title>
+        <link rel="manifest" href="/manifest.webmanifest" />
+        {/* <link rel="icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
+  <link rel="mask-icon" href="/mask-icon.svg" color="#FFFFFF">
+  <meta name="theme-color" content="#ffffff"> */}
+      </head>
+      <body>
+        <div id="page-view" dangerouslySetInnerHTML={{ __html: pageHtml }} />
+      </body>
+    </html>
   );
 
   return {

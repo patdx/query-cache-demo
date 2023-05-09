@@ -7,11 +7,11 @@ export function useCachedQuery<T extends () => unknown>(
   {
     queryKey,
     queryFn,
-    memoryStaleMs = 5_000,
-    memoryCacheMs = 10_000,
+    memoryStaleMs = 10_000,
+    memoryCacheMs = 20_000,
     // memoryCacheMs = 5 * 60 * 1_000,
-    storageStaleMs = 5_000,
-    storageCacheMs = 10_000,
+    storageStaleMs = 30_000,
+    storageCacheMs = 60_000,
   }: {
     queryKey: QueryKey;
     queryFn: T;

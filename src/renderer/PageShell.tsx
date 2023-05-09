@@ -4,10 +4,10 @@ import { queryClient } from '../shared/idb-cache';
 import type { PageContext } from './types';
 import { PageContextProvider } from './usePageContext';
 import 'tailwindcss/tailwind.css';
+import 'water.css/out/light.css';
+import { ReloadPrompt } from '../shared/reload-prompt';
 
-export { PageShell };
-
-function PageShell({
+export function PageShell({
   children,
   pageContext,
 }: {
@@ -18,6 +18,7 @@ function PageShell({
     <React.StrictMode>
       <PageContextProvider pageContext={pageContext}>
         <QueryClientProvider client={queryClient}>
+          <ReloadPrompt />
           <Layout>{children}</Layout>
         </QueryClientProvider>
       </PageContextProvider>

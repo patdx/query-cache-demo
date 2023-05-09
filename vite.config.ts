@@ -8,6 +8,12 @@ export default defineConfig({
   plugins: [
     react(),
     ssr({ prerender: true }),
-    VitePWA({ registerType: "autoUpdate" }),
+    VitePWA({
+      registerType: "autoUpdate",
+      injectRegister: null,
+      devOptions: {
+        // enabled: true,
+      },
+    }),
   ],
 });
