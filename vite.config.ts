@@ -12,6 +12,8 @@ export default defineConfig({
       registerType: "autoUpdate",
       injectRegister: null,
       devOptions: {
+        // TODO: not possible to enable because it also enables an HTML
+        // transform that we do not support.
         // enabled: true,
       },
     }),

@@ -1,10 +1,12 @@
 // See https://vite-plugin-ssr.com/data-fetching
-export const passToClient = ['pageProps', 'urlPathname'];
+export const passToClient = ['pageProps', 'urlPathname', 'documentProps'];
 
 import ReactDOMServer, { renderToStaticMarkup } from 'react-dom/server';
 import { PageShell } from './PageShell';
 import type { PageContextServer } from './types';
 import { dangerouslySkipEscape } from 'vite-plugin-ssr/server';
+import { getPageTitle } from './get-page-title';
+import { pwaInfo } from 'virtual:pwa-info';
 
 export async function render(pageContext: PageContextServer) {
   const { Page, pageProps } = pageContext;
@@ -19,7 +21,7 @@ export async function render(pageContext: PageContextServer) {
 
   // See https://vite-plugin-ssr.com/head
   const { documentProps } = pageContext.exports;
-  const title = (documentProps && documentProps.title) || 'Vite SSR app';
+  const title = getPageTitle(pageContext);
   const desc =
     (documentProps && documentProps.description) || 'Cached Query Test';
 
@@ -30,7 +32,9 @@ export async function render(pageContext: PageContextServer) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="description" content={desc} />
         <title>{title}</title>
-        <link rel="manifest" href="/manifest.webmanifest" />
+        {pwaInfo?.webManifest?.href ? (
+          <link rel="manifest" href={pwaInfo.webManifest.href} />
+        ) : null}
         {/* <link rel="icon" href="/favicon.ico">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
   <link rel="mask-icon" href="/mask-icon.svg" color="#FFFFFF">

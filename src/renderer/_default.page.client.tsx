@@ -1,24 +1,44 @@
 export { render };
+export { onHydrationEnd };
+export { onPageTransitionStart };
+export { onPageTransitionEnd };
 
-import { hydrateRoot } from 'react-dom/client';
+export const clientRouting = true;
+export const hydrationCanBeAborted = true;
+
+import ReactDOM from 'react-dom/client';
 import { PageShell } from './PageShell';
+import { getPageTitle } from './get-page-title';
 import type { PageContextClient } from './types';
 
-// This render() hook only supports SSR, see https://vite-plugin-ssr.com/render-modes for how to modify render() to support SPA
+let root: ReactDOM.Root;
 async function render(pageContext: PageContextClient) {
   const { Page, pageProps } = pageContext;
-  if (!Page)
-    throw new Error(
-      'Client-side render() hook expects pageContext.Page to be defined'
-    );
-  hydrateRoot(
-    document.getElementById('page-view')!,
+  const page = (
     <PageShell pageContext={pageContext}>
       <Page {...pageProps} />
     </PageShell>
   );
+  const container = document.getElementById('page-view')!;
+  if (pageContext.isHydration) {
+    root = ReactDOM.hydrateRoot(container, page);
+  } else {
+    if (!root) {
+      root = ReactDOM.createRoot(container);
+    }
+    root.render(page);
+  }
+  document.title = getPageTitle(pageContext);
 }
 
-/* To enable Client-side Routing:
-export const clientRouting = true
-// !! WARNING !! Before doing so, read https://vite-plugin-ssr.com/clientRouting */
+function onHydrationEnd() {
+  console.log('Hydration finished; page is now interactive.');
+}
+function onPageTransitionStart() {
+  console.log('Page transition start');
+  document.querySelector('body')!.classList.add('page-is-transitioning');
+}
+function onPageTransitionEnd() {
+  console.log('Page transition end');
+  document.querySelector('body')!.classList.remove('page-is-transitioning');
+}

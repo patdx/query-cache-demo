@@ -1,18 +1,29 @@
 // Note that this file isn't processed by Vite, see https://github.com/brillout/vite-plugin-ssr/issues/562
 
-import express from "express";
+import {
+  createApp,
+  createRouter,
+  eventHandler,
+  fromNodeMiddleware,
+  getRequestURL,
+  setResponseHeader,
+  setResponseStatus,
+  toNodeListener,
+  writeEarlyHints,
+} from "h3";
 import { renderPage } from "vite-plugin-ssr/server";
 import { root } from "./root.js";
+import { createServer } from "node:http";
 const isProduction = process.env.NODE_ENV === "production";
 
 startServer();
 
 async function startServer() {
-  const app = express();
+  const app = createApp();
 
   if (isProduction) {
     const sirv = (await import("sirv")).default;
-    app.use(sirv(`${root}/dist/client`));
+    app.use(fromNodeMiddleware(sirv(`${root}/dist/client`)));
   } else {
     const vite = await import("vite");
     const viteDevMiddleware = (
@@ -21,24 +32,35 @@ async function startServer() {
         server: { middlewareMode: true },
       })
     ).middlewares;
-    app.use(viteDevMiddleware);
+    app.use(fromNodeMiddleware(viteDevMiddleware));
   }
 
-  app.get("*", async (req, res, next) => {
-    const pageContextInit = {
-      urlOriginal: req.originalUrl,
-    };
-    const pageContext = await renderPage(pageContextInit);
-    const { httpResponse } = pageContext;
-    if (!httpResponse) return next();
-    const { body, statusCode, contentType, earlyHints } = httpResponse;
-    if (res.writeEarlyHints) {
-      res.writeEarlyHints({ link: earlyHints.map((e) => e.earlyHintLink) });
-    }
-    res.status(statusCode).type(contentType).send(body);
-  });
+  app.use(
+    // "*",
+    eventHandler(async (event) => {
+      const url = getRequestURL(event);
+
+      const pageContextInit = {
+        urlOriginal: url.pathname + url.search + url.hash,
+      };
+      const pageContext = await renderPage(pageContextInit);
+
+      const { httpResponse } = pageContext;
+
+      if (!httpResponse) return;
+
+      const { earlyHints, statusCode, contentType } = httpResponse;
+
+      writeEarlyHints(event, { link: earlyHints.map((e) => e.earlyHintLink) });
+
+      setResponseHeader(event, "content-type", contentType);
+      setResponseStatus(event, statusCode);
+
+      return pageContext.httpResponse.body;
+    }),
+  );
 
   const port = process.env.PORT || 3000;
-  app.listen(port);
+  createServer(toNodeListener(app)).listen(port);
   console.log(`Server running at http://localhost:${port}`);
 }
